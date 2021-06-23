@@ -183,15 +183,47 @@
 				>
 			</File>
 			<Filter
-				Name="Math Support"
+				Name="Units"
 				>
 				<File
-					RelativePath=".\src\mth\mth.h"
+					RelativePath=".\src\units\u_ball.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\units\u_ctrl.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\units\units.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Animation System"
+				>
+				<File
+					RelativePath=".\src\anim\anim.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\anim\anim.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\anim\timer.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\anim\unit.c"
 					>
 				</File>
 				<Filter
 					Name="Rendering Subsystem"
 					>
+					<File
+						RelativePath=".\src\anim\rnd\glew.c"
+						>
+					</File>
 					<File
 						RelativePath=".\src\anim\rnd\rnd.h"
 						>
@@ -208,17 +240,29 @@
 						RelativePath=".\src\anim\rnd\rndprim.c"
 						>
 					</File>
+					<Filter
+						Name="Resoutses"
+						>
+						<File
+							RelativePath=".\src\anim\rnd\res\rndshd.c"
+							>
+						</File>
+					</Filter>
 				</Filter>
-			</Filter>
-			<Filter
-				Name="Animation System"
-				>
 			</Filter>
 			<Filter
 				Name="Windows Depended"
 				>
 				<File
 					RelativePath=".\src\win\main.c"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Math Support"
+				>
+				<File
+					RelativePath=".\src\mth\mth.h"
 					>
 				</File>
 			</Filter>

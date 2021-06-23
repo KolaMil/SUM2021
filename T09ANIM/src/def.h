@@ -1,13 +1,13 @@
 /* FILE NAME  : def.h
  * PROGRAMMER : NM6
- * LAST UPDATE: 21.06.2021
+ * LAST UPDATE: 17.06.2021
  * PURPOSE    : 3D animation common declaration module.
  */
 
 #ifndef __def_h_
 #define __def_h_
 
-#pragma warning(disable: 4244)
+#pragma warning(disable: 4244 4305)
 
 /* Debug memory allocation support */
 #ifndef NDEBUG

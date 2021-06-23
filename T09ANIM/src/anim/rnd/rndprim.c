@@ -1,115 +1,185 @@
-/* FILE NAME: rndPrim.c
- * PROGRAMMER: Nm6
- * DATE: 21.06.2021
- * PURPOSE: 3D animation primitive handle module.
- */
+/* FILE NAME: rndprim.c
+* PROGRAMMER: nm6
+* DATE: 18.06.2021
+* PURPOSE: 3D animation primitive handle module.
+*/
 
-#include <string.h>
-
+#include <stdio.h>
 #include "rnd.h"
 
-/***
- * Primrtive support
-***/
-
-
-BOOL NM6_RndPrimCreate( nm6PRIM *Pr, INT NoofV, INT NoofI )
+/* Primitive creation function.
+ * ARGUMENTS:
+ *   - primitive pointer:
+ *       nm6PRIM *Pr;
+ *   - vertex attributes array:
+ *       nm6VERTEX *V;
+ *   - number of vertices:
+ *       INT NumOfV;
+ *   - index array (for trimesh – by 3 ones, may be NULL)
+ *       INT *I;
+ *   - number of indices
+ *       INT NumOfI;
+ * RETURNS: None.
+ */
+VOID NM6_RndPrimCreate( nm6PRIM *Pr, nm6VERTEX *V, INT NumOfV, INT *I, INT NumOfI )
 {
-  INT size;
-
   memset(Pr, 0, sizeof(nm6PRIM));
-  size = sizeof(nm6VERTEX) * NoofV + sizeof(INT) * NoofI;
 
-  if ((Pr->V = malloc(size)) == NULL)
-    return FALSE;
-  Pr->I = (INT *)(Pr->V + NoofV);
-  Pr->NumOfV = NoofV;
-  Pr->NumOfI = NoofI;
+  if (V != NULL && NumOfV != 0)
+  {
+    glGenBuffers(1, &Pr->VBuf);
+    glGenVertexArrays(1, &Pr->VA);
+
+    glBindVertexArray(Pr->VA);
+    glBindBuffer(GL_ARRAY_BUFFER, Pr->VBuf);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(nm6VERTEX) * NumOfV, V, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, FALSE, sizeof(nm6VERTEX),
+                          (VOID *)0); /* position */
+    glVertexAttribPointer(1, 2, GL_FLOAT, FALSE, sizeof(nm6VERTEX),
+                          (VOID *)sizeof(VEC)); /* texture coordinates */
+    glVertexAttribPointer(2, 3, GL_FLOAT, FALSE, sizeof(nm6VERTEX),
+                          (VOID *)(sizeof(VEC) + sizeof(VEC2))); /* normal */
+    glVertexAttribPointer(3, 4, GL_FLOAT, FALSE, sizeof(nm6VERTEX),
+                          (VOID *)(sizeof(VEC) * 2 + sizeof(VEC2))); /* color */
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
+    glBindVertexArray(0);
+  }
+
+  if (I != NULL && NumOfI != 0)
+  {
+    glGenBuffers(1, &Pr->IBuf);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Pr->IBuf);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(INT) * NumOfI, I, GL_STATIC_DRAW);
+    Pr->NumOfElements = NumOfI;
+  }
+  else
+    Pr->NumOfElements = NumOfV;
   Pr->Trans = MatrIdentity();
-  memset(Pr->V, 0, size);
+} /* End of 'NM6_RndPrimCreate' function */
 
-  return TRUE;
-}
-
+/* NM6_RndPrimFree */
 VOID NM6_RndPrimFree( nm6PRIM *Pr )
 {
-  if (Pr->V != NULL)
-    free(Pr->V);
-  memset(Pr, 0, sizeof(nm6PRIM));
-} /* End of "NM6_RndPrimFree" function */
+  glBindVertexArray(Pr->VA);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glDeleteBuffers(1, &Pr->VBuf);
+  glBindVertexArray(0);
+  glDeleteVertexArrays(1, &Pr->VA);
 
+  glDeleteBuffers(1, &Pr->IBuf);
+
+  memset(Pr, 0, sizeof(nm6PRIM));
+}/* NM6_PrimFree */
+
+/* NM6_PrimDraw */
 VOID NM6_RndPrimDraw( nm6PRIM *Pr, MATR World )
 {
-  INT i;
-  MATR wvp = MatrMulMart3(Pr->Trans, World, NM6_RndMatrVP);
-  POINT *pnts;
+  MATR wvp = MatrMulMatr3(Pr->Trans, World, NM6_RndMatrVP);
 
-  if ((pnts = malloc(sizeof(POINT) * Pr->NumOfV)) == NULL)
-    return;
+  /* Send matrix to OpenGL /v.1.0 */
+  glLoadMatrixf(wvp.A[0]);
 
-  for (i = 0; i < Pr->NumOfV; i++)
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  if (Pr->IBuf == 0)
   {
-    VEC p = VecMulMatr(Pr->V[i].P, wvp);
-
-    pnts[i].x = (INT)((p.X + 1) * NM6_RndFrameW / 2);
-    pnts[i].x = (INT)((-p.Y + 1) * NM6_RndFrameH / 2);
+    glBindVertexArray(Pr->VA);
+    glDrawArrays(GL_TRIANGLES, 0, Pr->NumOfElements);
+    glBindVertexArray(0);
   }
-
-  for (i = 0; i < Pr->NumOfI; i += 3)
+  else
   {
-    MoveToEx(NM6_hRndDCFrame, pnts[Pr->I[i]].x, pnts[Pr->I[i]].y, NULL);
-    SelectObject(NM6_hRndDCFrame, GetStockObject(NULL_PEN));
-    SelectObject(NM6_hRndDCFrame, GetStockObject(DC_BRUSH));
-    SetDCBrushColor(NM6_hRndDCFrame, RGB(0, 0, 0));
-    LineTo(NM6_hRndDCFrame, pnts[Pr->I[i + 1]].x, pnts[Pr->I[i + 1]].y);
-    LineTo(NM6_hRndDCFrame, pnts[Pr->I[i + 2]].x, pnts[Pr->I[i + 2]].y);
-    LineTo(NM6_hRndDCFrame, pnts[Pr->I[i]].x, pnts[Pr->I[i]].y);
+    glBindVertexArray(Pr->VA);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Pr->IBuf);
+    glDrawElements(GL_TRIANGLES, Pr->NumOfElements, GL_UNSIGNED_INT, NULL);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
-  free(pnts);
-} /* End of "NM6_RndPrimDraw" function */
+}/* End of 'NM6_PrimDraw' function */
 
-/*BOOL NM6_RndPrimCreateGrid( nm6PRIM *Pr, VEC C, DBL R, INT SplitW, INT SplitH )
+/* NM6_RndPrimLoad */
+BOOL NM6_RndPrimLoad( nm6PRIM *Pr, CHAR *FileName )
 {
-  INT i, j, k;
-  DBL theta, phi;
+  FILE *F;                                          
+  INT i, nv = 0, nind = 0, size;
+  nm6VERTEX *V;
+  INT *Ind;
+  static CHAR Buf[1000];
 
-  if (!NM6_RndPrimCreate(Pr, SplitW * SplitH, (SplitW - 1) * (SplitH - 1) *  6))
-  for (k = 0, i = 0; i < SplitH - 1; i++)
-    for (j = 0; j < SplitW - 1; j++)
+  memset(Pr, 0, sizeof(nm6PRIM));
+  if ((F = fopen(FileName, "r")) == NULL)
+    return FALSE;
+
+  /* Count vertexes and indexes */
+  while (fgets(Buf, sizeof(Buf) - 1, F) != NULL)
+  {
+    if (Buf[0] == 'v' && Buf[1] == ' ')
+      nv++;
+    else if (Buf[0] == 'f' && Buf[1] == ' ')
     {
-      Pr->I
-    }   
-  return TRUE;
-}
+      INT n = 0;
 
-BOOL NM6_RndPrimCreateShere( nm6PRIM *Pr, VEC C, DBL R, INT SplitW, INT SplitH )
-{
-  INT i, j;
-  DBL theta, phi;
+      for (i = 1; Buf[i] != 0; i++)
+        if (Buf[i - 1] == ' ' && Buf[i] != ' ')
+          n++;
+      nind += (n - 2) * 3;
+    }
+  }
 
-  if (!NM6_RndPrimCreateGrid(Pr, SplitW, SplitH, ))
+  size = sizeof(nm6VERTEX) * nv + sizeof(INT) * nind;
+  if ((V = malloc(size)) == NULL)
     return FALSE;
-  
-  for (theta = 0, i = 0; i < SplitH; i++, theta += PI / (SplitH -1))
-    for (phi = 0, j = 0; j < SplitW; i++, phi += PI / (SplitW -1))
-      Pr->V[i * SplitW + j].P = VecSet(C.X + R * sin(theta) * sin(phi),
-                                        C.Y + R * cos(theta),
-                                        C.Z + R * sin(theta) * cos(phi));
+  Ind = (INT *)(V + nv);
+  memset(V, 0, size);
+
+  /* Load primitive */
+  rewind(F);
+  nv = 0;
+  nind = 0;
+  while (fgets(Buf, sizeof(Buf) - 1, F) != NULL)
+  {
+    if (Buf[0] == 'v' && Buf[1] == ' ')
+    {
+      DBL x, y, z;
+
+      sscanf(Buf + 2, "%lf%lf%lf", &x, &y, &z);
+      V[nv++].P = VecSet(x, y, z);
+    }
+    else if (Buf[0] == 'f' && Buf[1] == ' ')
+    {
+      INT n = 0, n0, n1, nc;
+
+      for (i = 1; Buf[i] != 0; i++)
+        if (isspace((UCHAR)Buf[i - 1]) && !isspace((UCHAR)Buf[i]))
+        {
+          sscanf(Buf + i, "%i", &nc);
+          if (nc < 0)
+            nc = nv + nc;
+          else
+            nc--;
+
+          if (n == 0)
+            n0 = nc;
+          else if (n == 1)
+            n1 = nc;
+          else
+          {
+            Ind[nind++] = n0;
+            Ind[nind++] = n1;
+            Ind[nind++] = nc;
+            n1 = nc;
+          }
+          n++;
+        }
+    }
+  }
+  fclose(F);
+  NM6_RndPrimCreate(Pr, V, nv, Ind, nind);
   return TRUE;
-}
+} /* End of 'NM6_RndPrimLoad' function */
 
-BOOL NM6_RndPrimCreatePlene( nm6PRIM *Pr, VEC P, VEC Du, INT SplitW, INT SplitH)
-{
-  INT i, j;
-
-  if (!NM6_RndPrimCreateGrid(Pr, SplitW, SplitH))
-    return FALSE;
-
-  for (i = 0; i < SplitH; i++)
-    for (j = 0; j < SplitW; j++)
-      Pr->V[i * SplitW + j].P = 
-        VecAddVec3(P, VecMulNum(Du, j / (SplitW - 1.0)), VecMulNum(Dv, i / (SplitH - 1.0)));
-  return TRUE;
-}
-*/
-/* END OF 'rndPrim.c' FILE */
+/* END OF 'rndprim.c' FILE */
