@@ -1,4 +1,4 @@
-/* FILE NAME: rnd.h
+  /* FILE NAME: rnd.h
 * PROGRAMMER: NM6
 * DATE: 17.06.2021
 * PURPOSE: 3D animation rendering declaration module.
@@ -45,6 +45,11 @@ typedef struct tagnm6PRIM
   MATR Trans;
 } nm6PRIM;
 
+/*typedef struct tagnm6UNIT_CONTROL
+{
+  ;
+}*/
+
 /* Render base functions */
 VOID NM6_RndInit( HWND hWnd );
 VOID NM6_RndClose( VOID );
@@ -66,6 +71,26 @@ VOID NM6_RndEnd( VOID );
 
 /* NM6_RndResize */
 VOID NM6_RndResize( INT W, INT H );
+
+#define NM6_STR_MAX 300
+
+/* Shader program store type */
+typedef struct tagnm6SHADER
+{
+  CHAR Name[NM6_STR_MAX]; /* Shader filename prefix */
+  INT ProgId;             /* Shader program Id */
+} nm6SHADER;
+
+#define NM6_MAX_SHADERS 30
+extern nm6SHADER NM6_RndShaders[NM6_MAX_SHADERS];
+extern INT NM6_RndShadersSize;
+
+
+VOID NM6_RndShadersInit( VOID );
+VOID NM6_RndShadersClose( VOID );
+INT NM6_RndShaderAdd( CHAR *FileNamePrefix );
+VOID NM6_RndShadersUpdate( VOID );
+
 
 #endif /* __rnd_h_ */
 

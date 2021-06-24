@@ -79,6 +79,7 @@ VOID NM6_RndInit( HWND hWnd )
   /* Set default OpenGL parameters */
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.08, 0.16, 0.08, 1);
+  NM6_RndShadersInit();
 
   /* Render perametrs */
   NM6_RndProjSize = 0.1;
@@ -92,6 +93,7 @@ VOID NM6_RndInit( HWND hWnd )
 /* NM6_RndClose */
 VOID NM6_RndClose( VOID )
 {
+  NM6_RndShadersClose();
   wglMakeCurrent(NULL, NULL);
   wglDeleteContext(NM6_hRndGLRC);
   ReleaseDC(NM6_hRndWnd, NM6_hRndDC);
@@ -132,6 +134,7 @@ VOID NM6_RndCamSet( VEC Loc, VEC At, VEC Up )
 /* NM6_RndStart */
 VOID NM6_RndStart( VOID )
 {
+  NM6_RndShadersUpdate();
   /* Clear frame */
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }/* End of 'NM6_RndStart' function */

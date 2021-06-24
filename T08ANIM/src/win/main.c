@@ -1,37 +1,37 @@
 /* FILE NAME: main.c
- * PROGRAMMER: Nm6
- * DATE: 17.06.2021
- * PURPOSE: WinAPI application sample.
- */
-
-#include <time.h>
+* PROGRAMMER: NM6
+* DATE: 17.06.2021
+* PURPOSE: 3D animation startup module.
+*/
 
 #include "../anim/rnd/rnd.h"
+
+#include "../anim/unit/units.h"
 
 /* Window class name */
 #define NM6_WND_CLASS_NAME "My Window Class Name"
 
 /* Forward declaration */
-LRESULT CALLBACK WinFunc( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam );
+LRESULT CALLBACK NM6_WinFunc( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam );
 
 /* The main program function.
- * ARGUMENTS:
- *   - handle of application instance:
- *       HINSTANCE hInstance;
- *   - dummy handle of previous application instance (not used):
- *       HINSTANCE hPrevInstance;
- *   - command line string:
- *       CHAR *CmdLine;
- *   - show window command parameter (see SW_***):
- *       INT CmdShow;
- * RETURNS:
- *   (INT) Error level for operation system (0 for success).
- */
+* ARGUMENTS:
+* - handle of application instance:
+* HINSTANCE hInstance;
+* - dummy handle of previous application instance (not used):
+* HINSTANCE hPrevInstance;
+* - command line string:
+* CHAR *CmdLine;
+* - show window command parameter (see SW_***):
+* INT CmdShow;
+* RETURNS:
+* (INT) Error level for operation system (0 for success).
+*/
 INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, CHAR *CmdLine, INT CmdShow )
 {
   HWND hWnd;
-  WNDCLASS wc;
   MSG msg;
+  WNDCLASS wc;
 
   SetDbgMemHooks();
 
@@ -45,134 +45,92 @@ INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, CHAR *CmdLine,
   wc.hInstance = hInstance;
   wc.lpszClassName = NM6_WND_CLASS_NAME;
   wc.lpszMenuName = NULL;
-  wc.lpfnWndProc = WinFunc;
-
+  wc.lpfnWndProc = NM6_WinFunc;
 
   /* Register window class */
   if (!RegisterClass(&wc))
   {
-    MessageBox(NULL, "Error regoister window class", "Error", MB_OK | MB_ICONEXCLAMATION);
+    MessageBox(NULL, "Error register window class", "Error", MB_OK | MB_ICONERROR);
     return 0;
   }
 
   hWnd =
-    CreateWindow(NM6_WND_CLASS_NAME,
-      "Kola07ah",
-      WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, CW_USEDEFAULT,
-      CW_USEDEFAULT, CW_USEDEFAULT,
-      NULL,
-      NULL,
-      hInstance,                                                                        
-      NULL);
-  /**/
-  ShowWindow(hWnd, SW_SHOWNORMAL);
+  CreateWindow(NM6_WND_CLASS_NAME,
+  "KOLA)&AH",
+  WS_OVERLAPPEDWINDOW,
+  CW_USEDEFAULT, CW_USEDEFAULT,
+  CW_USEDEFAULT, CW_USEDEFAULT,
+  NULL,
+  NULL,
+  hInstance,
+  NULL);
+
+  /* Show window */
+  ShowWindow(hWnd, CmdShow);
   UpdateWindow(hWnd);
 
-  /* Window creation */
-  hWnd = CreateWindow(NM6_WND_CLASS_NAME, "CGSG Primary Practice Group First Window",
-    WS_OVERLAPPEDWINDOW,
-    /* CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, */
-    1920 * 2, 0, 1100, 700,
-    NULL, NULL, hInstance, NULL);
 
-  ShowWindow(hWnd, CmdShow);
 
   /* Message loop */
-  while (TRUE)
-    if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-    {
-      if (msg.message == WM_QUIT)
-        break;
-      DispatchMessage(&msg);
-    }
-    else
-      SendMessage(hWnd, WM_TIMER, 30, 0);
+  while (GetMessage(&msg, NULL, 0, 0))
+    DispatchMessage(&msg);
+
   return 30;
 } /* End of 'WinMain' function */
 
 /* Window handle function.
- * ARGUMENTS:
- *   - window handle:
- *      HWND hWnd;
- *   - message type (see WM_***):
- *      UINT Msg;
- *   - message 'word' parameter:
- *      WPARAM wParam;
- *   - message 'long' parameter:
- *      LPARAM lParam;
- * RETURNS:
- *   (LRESULT) message depende return value.
- */     
-LRESULT CALLBACK WinFunc( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam )
+* ARGUMENTS:
+* - window handle:
+* HWND hWnd;
+* - message type (see WM_***):
+* UINT Msg;
+* - message 'word' parameter:
+* WPARAM wParam;
+* - message 'long' parameter:
+* LPARAM lParam;
+* RETURNS:
+* (LRESULT) message depende return value.
+*/
+LRESULT CALLBACK NM6_WinFunc( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam )
 {
-  HDC hDC;
-  PAINTSTRUCT ps;
-  static nm6PRIM Pr, PrF, PrS, PrP; 
-
+  HDC hDC = GetDC(hWnd);
 
   switch (Msg)
   {
-   case WM_GETMINMAXINFO:
-    ((MINMAXINFO *)lParam)->ptMaxTrackSize.y = 
-      GetSystemMetrics(SM_CYMAXTRACK) + GetSystemMetrics(SM_CYCAPTION) + GetSystemMetrics(SM_CYBORDER);
-    return 0;
-
+  /* create */
   case WM_CREATE:
-    SetTimer(hWnd, 30, 1, NULL);
-    NM6_RndInit(hWnd);
-    NM6_RndPrimCreate(&Pr, 3, 3);
-    Pr.V[0].P = VecSet(0, 0, 0);
-    Pr.V[1].P = VecSet(2, 0, 0);
-    Pr.V[2].P = VecSet(0, 3, 0);
-    Pr.I[0] = 0;
-    Pr.I[1] = 1;
-    Pr.I[2] = 2;
-
-    /*NM6_RndPrimCreateShere(&PrS, VecSet(0, 0, 0), 0.47, 27, 13);*/ 
-    NM6_RndPrimLoad(&PrF, "cow.obj"); 
+    NM6_AnimInit(hWnd);
+    SetTimer(hWnd, 47, 1, NULL);
     return 0;
-   
+
+  /* size */
   case WM_SIZE:
-    /* Redraw frame */
-    NM6_RndResize(LOWORD(lParam), HIWORD(lParam));
-    SendMessage(hWnd, WM_TIMER, 0, 0);
+    NM6_AnimResize(LOWORD(lParam), HIWORD(lParam));
+    SendMessage(hWnd, WM_TIMER, 47, 0);
     return 0;
 
+  /* timer */
   case WM_TIMER:
-    /* Draw content */
-    NM6_RndStart();
-    /* Draw primtive */
-    NM6_RndPrimDraw(&Pr, MatrIdentity());
-    NM6_RndEnd();
-
-    hDC = GetDC(hWnd);
-
-    NM6_RndCopyFrame(hDC);
-    EndPaint(hWnd, &ps);
-    ReleaseDC(hWnd, hDC);
+    NM6_AnimRender();
     return 0;
- 
+
+  /* paint */
+  case WM_PAINT:
+    NM6_AnimCopyFrame(hDC);
+    return 0;
+
+  /* destroy */
+  case WM_DESTROY:
+    NM6_AnimClose();
+    KillTimer(hWnd, 30);
+    PostQuitMessage(45);
+    return 0;
+
+  /* erase */
   case WM_ERASEBKGND:
     return 1;
-
-  case WM_PAINT:
-    hDC = BeginPaint(hWnd, &ps);
-    NM6_RndCopyFrame(hDC);
-    EndPaint(hWnd, &ps);
-    return 0;
-
-  case WM_DESTROY:
-    NM6_RndPrimFree(&PrF);
-    NM6_RndPrimFree(&Pr);
-    NM6_RndPrimFree(&PrS);
-    NM6_RndPrimFree(&PrP);
-    NM6_RndClose();
-    KillTimer(hWnd, 30);
-    PostMessage(hWnd, WM_QUIT, 0, 0);
-    return 0;
   }
   return DefWindowProc(hWnd, Msg, wParam, lParam);
-} /* End of 'NM6_WinFunc' function */
+}/* End of 'NM6_WinFunc' function */
 
-/* END OF 'pattern.c' FILE */
+/* END OF 'main.c' FILE */

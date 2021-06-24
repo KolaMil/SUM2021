@@ -1,9 +1,8 @@
 /* FILE NAME: rndshd.c
- * PROGRAMMER: VG4
+ * PROGRAMMER: NM6
  * DATE: 23.06.2021
  * PURPOSE: 3D animation rendering shader handle functions module.
  */
-
 
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +12,11 @@
 /***
  * Base shaders functions
  ***/
+
+
+/* Shadre stock array and it size */
+nm6SHADER NM6_RndShaders[NM6_MAX_SHADERS];
+INT NM6_RndShadersSize;
 
 /* Save log to file function.
  * ARGUMENTS:
@@ -28,7 +32,7 @@ VOID NM6_RndShdLog( CHAR *FileNamePrefix, CHAR *ShaderName, CHAR *Text )
 {
   FILE *F;
 
-  if ((F = fopen("BIN/SHADERS/shd{30}nm6.log", "a")) == NULL)
+  if ((F = fopen("BIN/SHADERS/shd{30}nm4.log", "a")) == NULL)
     return;
   fprintf(F, "%s : %s\n%s\n\n", FileNamePrefix, ShaderName, Text);
   fclose(F);
@@ -202,10 +206,6 @@ VOID NM6_RndShdFree( INT ProgId )
 /***
  * Shaders stock functions
  ***/
-
-/* Shadre stock array and it size */
-nm6SHADER NM6_RndShaders[NM6_MAX_SHADERS];
-INT NM6_RndShadersSize;
 
 /* Shader stock initialization function.
  * ARGUMENTS: None.

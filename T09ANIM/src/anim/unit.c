@@ -89,7 +89,7 @@ nm6UNIT * NM6_AnimUnitCreate( INT Size )
   /* Setup unit methods */
   Uni->Init = NM6_UnitInit;
   Uni->Close = NM6_UnitClose;
-  Uni->Response = NM6_UnitResponse;
+  Uni->Response = NM6_UnitInit;
   Uni->Render = NM6_UnitRender;
 
   return Uni;

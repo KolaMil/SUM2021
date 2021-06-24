@@ -81,24 +81,25 @@ VOID NM6_RndPrimDraw( nm6PRIM *Pr, MATR World )
 {
   MATR wvp = MatrMulMatr3(Pr->Trans, World, NM6_RndMatrVP);
 
+  INT ProgId = NM6_RndShaders[0].ProgId, loc;
+
+  glUseProgram(ProgId);
+
+  if ((loc = glGetUniformLocation(ProgId, "MatrWVP")) != -1)
+    glUniformMatrix4fv(loc, 1, FALSE, wvp.A[0]);
+  /*if ((loc = glGetUniformLocation(ProgId, "Time")) != -1)
+    glUniform1f(loc, nm6ANIM.Time); */
+
   /* Send matrix to OpenGL /v.1.0 */
   glLoadMatrixf(wvp.A[0]);
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  if (Pr->IBuf == 0)
-  {
-    glBindVertexArray(Pr->VA);
-    glDrawArrays(GL_TRIANGLES, 0, Pr->NumOfElements);
-    glBindVertexArray(0);
-  }
-  else
-  {
-    glBindVertexArray(Pr->VA);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Pr->IBuf);
-    glDrawElements(GL_TRIANGLES, Pr->NumOfElements, GL_UNSIGNED_INT, NULL);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  }
+  glBindVertexArray(Pr->VA);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Pr->IBuf);
+  glDrawElements(GL_TRIANGLES, Pr->NumOfElements, GL_UNSIGNED_INT, NULL);
+  glBindVertexArray(0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  glUseProgram(0);
 }/* End of 'NM6_PrimDraw' function */
 
 /* NM6_RndPrimLoad */
@@ -175,6 +176,18 @@ BOOL NM6_RndPrimLoad( nm6PRIM *Pr, CHAR *FileName )
           }
           n++;
         }
+        /*for (i = 0; i < Ind; i += 3)
+          {
+            VEC
+              p0 = V[Ind[i]].P,
+              p1 = V[Ind[i + 1]].P,
+              p2 = V[Ind[i + 2]].P,
+              N = VecNormalize(VecCrossVec(VecSubVec(p1, p0), VecSubVec(p2, p0)));
+
+            V[Ind[i]].N = VecAddVec(V[Ind[i]].N, N); /* VecAddVecEq(&V[Ind[i]].N, N); */
+            /*V[Ind[i + 1]].N = VecAddVec(V[Ind[i + 1]].N, N);
+            V[Ind[i + 2]].N = VecAddVec(V[Ind[i + 2]].N, N);
+          }                                                */
     }
   }
   fclose(F);

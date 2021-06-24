@@ -15,7 +15,7 @@
 typedef struct tagnm6UNIT nm6UNIT;
 typedef struct tagnm6ANIM nm6ANIM;
 
-#define NM6_NM6_UNIT_BASE_FIELDS \
+#define NM6_UNIT_BASE_FIELDS \
 VOID (*Init)( nm6UNIT *Uni, nm6ANIM *Ani ); \
 VOID (*Close)( nm6UNIT *Uni, nm6ANIM *Ani ); \
 VOID (*Response)( nm6UNIT *Uni, nm6ANIM *Ani ); \
@@ -36,6 +36,7 @@ struct tagnm6ANIM
   GlobalTime, GlobalDeltaTime, /* Global time and interframe interval */
   Time, DeltaTime, /* Time with pause and interframe interval */
   FPS; /* Frames per second value */
+
   BOOL
   IsPause; /* Pause flag */
 
@@ -43,13 +44,17 @@ struct tagnm6ANIM
     Keys[256],
     KeysOld[256],
     KeysClick[256];
-
+  /*DBL
+    Mx, My, Mz,
+    Mdx, Mdy, Mdz;
+  DBL
+    JX, JZ, JZ;*/
 };
 
 /* struct tagUNIT */
 struct tagnm6UNIT
 {
-  NM6_NM6_UNIT_BASE_FIELDS;
+  NM6_UNIT_BASE_FIELDS;
 };
 
 /* AnimClose */

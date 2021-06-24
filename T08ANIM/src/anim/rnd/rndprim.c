@@ -1,25 +1,17 @@
-/* FILE NAME: rndPrim.c
- * PROGRAMMER: Nm6
- * DATE: 17.06.2021
- * PURPOSE: 3D animation primitive handle module.
- */
-
+/* FILE NAME: rndprim.c
+* PROGRAMMER: nm6
+* DATE: 18.06.2021
+* PURPOSE: 3D animation primitive handle module.
+*/
 
 #include <stdio.h>
-#include <string.h>
-
 #include "rnd.h"
 
-/***
- * Primrtive support
-***/
-
-
+/* NM6_RndPrimCreate */
 BOOL NM6_RndPrimCreate( nm6PRIM *Pr, INT NoofV, INT NoofI )
 {
   INT size;
-
-  memset(Pr, 0, sizeof(nm6PRIM));   /* <-- <string.h> */
+  memset(Pr, 0, sizeof(nm6PRIM));
   size = sizeof(nm6VERTEX) * NoofV + sizeof(INT) * NoofI;
 
   if ((Pr->V = malloc(size)) == NULL)
@@ -31,25 +23,27 @@ BOOL NM6_RndPrimCreate( nm6PRIM *Pr, INT NoofV, INT NoofI )
   memset(Pr->V, 0, size);
 
   return TRUE;
-}
+}/* End of 'NM6_RndPrimCreate' function */
 
+/* NM6_RndPrimFree */
 VOID NM6_RndPrimFree( nm6PRIM *Pr )
 {
   if (Pr->V != NULL)
     free(Pr->V);
   memset(Pr, 0, sizeof(nm6PRIM));
-} /* End of "NM6_RndPrimFree" function */
+}/* NM6_PrimFree */
 
+/* NM6_PrimDraw */
 VOID NM6_RndPrimDraw( nm6PRIM *Pr, MATR World )
 {
-  INT i;
   MATR wvp = MatrMulMatr3(Pr->Trans, World, NM6_RndMatrVP);
   POINT *pnts;
+  INT i;
 
   if ((pnts = malloc(sizeof(POINT) * Pr->NumOfV)) == NULL)
     return;
 
-  /* Build projection */
+  /* build projection */
   for (i = 0; i < Pr->NumOfV; i++)
   {
     VEC p = VecMulMatr(Pr->V[i].P, wvp);
@@ -58,80 +52,18 @@ VOID NM6_RndPrimDraw( nm6PRIM *Pr, MATR World )
     pnts[i].y = (INT)((-p.Y + 1) * NM6_RndFrameH / 2);
   }
 
-  /* Draw triangles */
+  /* draw triangles */
   for (i = 0; i < Pr->NumOfI; i += 3)
   {
     MoveToEx(NM6_hRndDCFrame, pnts[Pr->I[i]].x, pnts[Pr->I[i]].y, NULL);
-    Ellipse(NM6_hRndDCFrame, pnts[Pr->I[i + 1]].x, pnts[Pr->I[i + 1]].y, 200, 200);
-    MoveToEx(NM6_hRndDCFrame, 10, 10, NULL);
-    LineTo(NM6_hRndDCFrame, pnts[Pr->I[i + 1]].x, 100);
     LineTo(NM6_hRndDCFrame, pnts[Pr->I[i + 1]].x, pnts[Pr->I[i + 1]].y);
     LineTo(NM6_hRndDCFrame, pnts[Pr->I[i + 2]].x, pnts[Pr->I[i + 2]].y);
     LineTo(NM6_hRndDCFrame, pnts[Pr->I[i]].x, pnts[Pr->I[i]].y);
   }
   free(pnts);
-}
+}/* End of 'NM6_PrimDraw' function */
 
-BOOL NM6_RndPrimCreateGrid( nm6PRIM *Pr, INT SplitW, INT SplitH )
-{
-  INT i, j, k;
-
-  if (!NM6_RndPrimCreate(Pr, SplitW * SplitH, (SplitW - 1) * (SplitH - 1) *  6))
-    return FALSE;
-    
-  for (k = 0, i = 0; i < SplitH - 1; i++)
-    for (j = 0; j < SplitW - 1; j++)
-    {
-      Pr->I[k++] = i * SplitW + j;
-      Pr->I[k++] = i * SplitW + j + 1;
-      Pr->I[k++] = (i + 1) * SplitW + j;
-
-      Pr->I[k++] = (i + 1) * SplitW + j;
-      Pr->I[k++] = i * SplitW + j + 1;
-      Pr->I[k++] = (i + 1) * SplitW + j + 1;
-    }   
-  return TRUE;
-}
-
-BOOL NM6_RndPrimCreateShere( nm6PRIM *Pr, VEC C, DBL R, INT SplitW, INT SplitH )
-{
-  INT i, j;
-  DBL theta, phi;
-
-  if (!NM6_RndPrimCreateGrid(Pr, SplitW, SplitH))
-    return FALSE;
-  
-  for (theta = 0, i = 0; i < SplitH; i++, theta += PI / (SplitH -1))
-    for (phi = 0, j = 0; j < SplitW; i++, phi += PI / (SplitW -1))
-      Pr->V[i * SplitW + j].P = VecSet(C.X + R * sin(theta) * sin(phi),
-                                        C.Y + R * cos(theta),
-                                        C.Z + R * sin(theta) * cos(phi));
-  return TRUE;
-}
-
-/*BOOL NM6_RndPrimCreatePlene( nm6PRIM *Pr, VEC P, VEC Du, INT SplitW, INT SplitH)
-{
-  INT i, j;
-
-  if (!NM6_RndPrimCreateGrid(Pr, SplitW, SplitH))
-    return FALSE;
-
-  for (i = 0; i < SplitH; i++)
-    for (j = 0; j < SplitW; j++)
-      Pr->V[i * SplitW + j].P = 
-        VecAddVec(P, VecDivNum(Du, j / (SplitW - 1.0)), VecMulNum(Dv, i / (SplitH - 1.0)));
-  return TRUE;
-} */
-
-/* Load primitive from '*.OBJ' file function.
- * ARGUMENTS:
- *   - pointer to primitive to load:
- *       vg4PRIM *Pr;
- *   - '*.OBJ' file name:
- *       CHAR *FileName;
- * RETURNS:
- *   (BOOL) TRUE if success, FALSE otherwise.
- */
+/* NM6_RndPrimLoad */
 BOOL NM6_RndPrimLoad( nm6PRIM *Pr, CHAR *FileName )
 {
   FILE *F;
@@ -149,12 +81,12 @@ BOOL NM6_RndPrimLoad( nm6PRIM *Pr, CHAR *FileName )
       nv++;
     else if (Buf[0] == 'f' && Buf[1] == ' ')
     {
-      INT n = 0;
+    INT n = 0;
 
-      for (i = 1; Buf[i] != 0; i++)
-        if (isspace((UCHAR)Buf[i - 1]) && !isspace((UCHAR)Buf[i]))
-          n++;
-      nind += (n - 2) * 3;
+    for (i = 1; Buf[i] != 0; i++)
+      if (Buf[i - 1] == ' ' && Buf[i] != ' ')
+        n++;
+    nind += (n - 2) * 3;
     }
   }
 
@@ -179,35 +111,32 @@ BOOL NM6_RndPrimLoad( nm6PRIM *Pr, CHAR *FileName )
     }
     else if (Buf[0] == 'f' && Buf[1] == ' ')
     {
-      INT n = 0, n0, n1, nc;
+    INT n = 0, n0, n1, nc;
 
-      for (i = 1; Buf[i] != 0; i++)
-        if (isspace((UCHAR)Buf[i - 1]) && !isspace((UCHAR)Buf[i]))
-        {
-          sscanf(Buf + i, "%i", &nc);
-          if (nc < 0)
-            nc = nv + nc;
-          else
-            nc--;
+    for (i = 1; Buf[i] != 0; i++)
+    if (Buf[i - 1] == ' ' && Buf[i] != ' ')
+    {
+      sscanf(Buf + i, "%i", &nc);
+      nc--;
 
-          if (n == 0)
-            n0 = nc;
-          else if (n == 1)
-            n1 = nc;
-          else
-          {
-            Pr->I[nind++] = n0;
-            Pr->I[nind++] = n1;
-            Pr->I[nind++] = nc;
-            n1 = nc;
-          }
-          n++;
-        }
-    }
+      if (n == 0)
+      n0 = nc;
+      else if (n == 1)
+      n1 = nc;
+      else
+      {
+      Pr->I[nind++] = n0;
+      Pr->I[nind++] = n1;
+      Pr->I[nind++] = nc;
+      n1 = nc;
+      }
+    n++;
   }
+ }
+}
 
   fclose(F);
   return TRUE;
-} /* End of 'VG4_RndPrimLoad' function */
+} /* End of 'NM6_RndPrimLoad' function */
 
-/* END OF 'rndPrim.c' FILE */
+/* END OF 'rndprim.c' FILE */
