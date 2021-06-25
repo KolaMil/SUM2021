@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="T09ANIM"
-	ProjectGUID="{F94352C6-A40C-44D4-8B32-012A2778D3E6}"
+	ProjectGUID="{F515B83B-D549-4228-8A09-F580FB2BEC23}"
 	RootNamespace="T09ANIM"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
@@ -63,7 +63,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="X:\TGRKIT\LIB;$(OPENAL_DIR)Lib;"
+				AdditionalLibraryDirectories="X:\TGRKIT\LIB;$(OPENAL_DIR)Libs;"
 				GenerateManifest="false"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -139,7 +139,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="X:\TGRKIT\LIB;$(OPENAL_DIR)Lib;"
+				AdditionalLibraryDirectories="X:\TGRKIT\LIB;$(OPENAL_DIR)Libs;"
 				GenerateManifest="false"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -183,18 +183,10 @@
 				>
 			</File>
 			<Filter
-				Name="Units"
+				Name="Math Support"
 				>
 				<File
-					RelativePath=".\src\units\u_ball.c"
-					>
-				</File>
-				<File
-					RelativePath=".\src\units\u_ctrl.c"
-					>
-				</File>
-				<File
-					RelativePath=".\src\units\units.h"
+					RelativePath=".\src\mth\mth.h"
 					>
 				</File>
 			</Filter>
@@ -207,6 +199,10 @@
 				</File>
 				<File
 					RelativePath=".\src\anim\anim.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\anim\input.c"
 					>
 				</File>
 				<File
@@ -241,8 +237,12 @@
 						>
 					</File>
 					<Filter
-						Name="Resoutses"
+						Name="Resources"
 						>
+						<File
+							RelativePath=".\src\anim\rnd\res\rndres.h"
+							>
+						</File>
 						<File
 							RelativePath=".\src\anim\rnd\res\rndshd.c"
 							>
@@ -251,7 +251,7 @@
 				</Filter>
 			</Filter>
 			<Filter
-				Name="Windows Depended"
+				Name="Windows depended"
 				>
 				<File
 					RelativePath=".\src\win\main.c"
@@ -259,10 +259,18 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Math Support"
+				Name="Units"
 				>
 				<File
-					RelativePath=".\src\mth\mth.h"
+					RelativePath=".\src\units\u_ball.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\units\u_ctrl.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\units\units.h"
 					>
 				</File>
 			</Filter>

@@ -1,97 +1,130 @@
-/* FILE NAME: u_cow.c
-* PROGRAMMER: NM6
-* DATE: 21.06.2021
-* PURPOSE:
-*/
-
+/* FILE NAME : unit_ctrl.c
+ * PROGRAMMER: NM6
+ * DATE      : 21.06.2021 
+ * PURPOSE   : Ctrl unit module
+ */
 #include <stdio.h>
-#include "../anim/anim.h"
 
-/* typedef nm6INIT_ctrl */
-/*typedef struct tagnm6UNIT_CONTROL
+#include "units.h"
+
+typedef struct tagnm6UNIT_CTRL
 {
-  NM6_UNIT_BASE_FIELDS;
-  DBL CamDist, RotX, RotY;           
-  BOOL IsWire;
-} nm6UNIT_ctrl;
+  UNIT_BASE_FIELDS;
+  VEC CamLoc;
+  VEC Dir;
+  VEC Right;
+  INT Speed;
+  DBL AngleSpeed;
 
-/* Cow unit initialization function
-* ARGUMENTS:
-* - self-pointer to unit object
-* nm6UNIT_BALL *Uni;
-* - animation context:
-* nm6ANIM *Ani;
-* RETURNS: None.
-*/
-/*static VOID NM6_UnitInit( nm6UNIT_ctrl *Uni, nm6ANIM *Ani )
+  VEC At;
+} nm6UNIT_CTRL;
+
+/* Ctrl unit initialization function.
+ * ARGUMENTS:
+ *   - self-pointer to unit object:
+ *       nm6UNIT_CTRL *Uni;
+ *   - animation context:
+ *       nm6ANIM *Ani;
+ * RETURNS: None.
+ */
+static VOID NM6_UnitInit( nm6UNIT_CTRL *Uni, nm6ANIM *Ani )
 {
-  Uni->CamLoc = VecSet(0, 0, 30);
-  Uni->CamDir = VecSet(0, 1, 0);
-  Uni->Speed = 10;
-}/* End of 'NM6_UnitInit' function */
+  Uni->CamLoc = VecSet(63, 53, -110);
+  Uni->Speed = 5;
+  Uni->AngleSpeed = 5;
+  Uni->At = VecSet1(0);
+  Uni->Dir = VecNormalize(VecSubVec(Uni->At, Uni->CamLoc));
+  Uni->Right = VecNormalize(VecCrossVec(Uni->Dir, VecSet(0, 1, 0)));
+} /* End of 'NM6_UnitInit' function */
 
-
-/* Cow unit inter frame events handle function
-* ARGUMENTS:
-* - self-pointer to unit object
-* nm6UNIT_BALL *Uni;
-* - animation context:
-* nm6ANIM *Ani;
-* RETURNS: None.
-*/
-/*static VOID NM6_UnitResponse( nm6UNIT_ctrl *Uni, nm6ANIM *Ani )
+/* Ctrl unit inter frame events handle function.
+ * ARGUMENTS:
+ *   - self-pointer to unit object:
+ *       nm6UNIT_CTRL *Uni;
+ *   - animation context:
+ *       nm6ANIM *Ani;
+ * RETURNS: None.
+ */
+static VOID NM6_UnitResponse( nm6UNIT_CTRL *Uni, nm6ANIM *Ani )
 {
- /* VEC ve;
+  if (Ani->Keys['S'] || Ani->Keys['W'])
+  {
+    Uni->CamLoc = VecAddVec(Uni->CamLoc, VecMulNum(Uni->Dir, Ani->GlobalDeltaTime * Uni->Speed * (Ani->Keys['W'] - Ani->Keys['S'])));
+    Uni->At = VecAddVec(Uni->At, VecMulNum(Uni->Dir, Ani->GlobalDeltaTime * Uni->Speed * (Ani->Keys['W'] - Ani->Keys['S'])));
+  }
+  if (Ani->Keys['A'] || Ani->Keys['D'])
+    Uni->CamLoc = VecAddVec(Uni->CamLoc, VecMulNum(Uni->Right, Ani->GlobalDeltaTime * Uni->Speed * (Ani->Keys['D'] - Ani->Keys['A'])));
+  
+  if (Ani->Mdz)
+    Uni->CamLoc = VecAddVec(Uni->CamLoc, VecMulNum(Uni->Dir, Ani->GlobalDeltaTime * Uni->Speed * Ani->Mdz * 0.01));
 
-  R = VecSet(NM6_RndMatrView.A[0][0], NM6_RndMatrView.A[1][0], NM6_RndMatrView.A[2][0]);
-  D = VecSet(-NM6_RndMatrView.A[0][2], -NM6_RndMatrView.A[1][2], -NM6_RndMatrView.A[2][2]);
-  D.Y = 0;
-  D = VecNormalize(D);
+  if (Ani->Keys[VK_LBUTTON])
+    Uni->CamLoc = PointTransform(Uni->CamLoc, MatrRotateY(-Ani->Keys[VK_LBUTTON] * Ani->GlobalDeltaTime * Uni->AngleSpeed * Ani->Mdx * 30));
 
-  Uni->CamDist += Ani->GlobalDeltaTime * (0.2 * Ani->Mdz + 8 * (1 + Ani->Keys[VK_SHIFT] * 26) * (Ani->Keys[VK_NEXT] - Ani->Keys[VK_PRIOR]));
-  Uni->RotY += Ani->GlobalDeltaTime * (-0.8 * 30 * Ani->Keys[VK_LBUTTON] * Ani->Mdx + 3 * 0.47 * (Ani->Keys[VK_LEFT] - Ani->Keys[VK_RIGHT]));
-  Uni->RotX += Ani->GlobalDeltaTime * (-0.8 * 30 * Ani->Keys[VK_LBUTTON] * Ani->Mdy + 0.47 * (Ani->Keys[VK_UP] - Ani->Keys[VK_DOWN]));
+  if (Ani->Keys[VK_DOWN] || Ani->Keys[VK_UP])
+  {
+    Uni->CamLoc.Y += Ani->GlobalDeltaTime * Uni->Speed * (Ani->Keys[VK_UP] - Ani->Keys[VK_DOWN]) * 18;
+    Uni->At.Y += Ani->GlobalDeltaTime * Uni->Speed * (Ani->Keys[VK_UP] - Ani->Keys[VK_DOWN]) * 18;
+  }
+  if (Ani->Keys[VK_RIGHT] || Ani->Keys[VK_LEFT])
+  {
+    Uni->CamLoc = VecAddVec(Uni->CamLoc, VecMulNum(Uni->Right, (Ani->Keys[VK_RIGHT] - Ani->Keys[VK_LEFT]) * 18 * Ani->GlobalDeltaTime));
+    Uni->At = VecAddVec(Uni->At, VecMulNum(Uni->Right, (Ani->Keys[VK_RIGHT] - Ani->Keys[VK_LEFT]) * 18 * Ani->GlobalDeltaTime));
+  }
+  Uni->Dir = VecNormalize(VecSubVec(Uni->At, Uni->CamLoc));
+  Uni->Right = VecNormalize(VecCrossVec(Uni->Dir, VecSet(0, 1, 0)));
+  NM6_RndCamLoc = Uni->CamLoc;
+  NM6_RndCamRight = Uni->Right;
+  NM6_RndCamAt = Uni->At;
+  NM6_RndCamDir = Uni->Dir;
+  NM6_RndCamUp = VecSet(0, 1, 0);
+} /* End of 'NM6_UnitResponse' function */
 
-  Uni->At = VecAddVec(Uni->At, VecMulNum(R, (Ani->Keys['D'] - Ani->Keys['A']) * 18 * Ani->GlobalDeltaTime));
-  Uni->At = VecAddVec(Uni->At, VecMulNum(D, (Ani->Keys['W'] - Ani->Keys['S']) * 18 * Ani->GlobalDeltaTime));
-
-  NM6_RndCamSet(PointTransform(VecSet(0, 0, Uni->CamDist),
-                               MatrMulMatr3(MatrRotateX(-18 * 5 / 2.0 * Uni->RotX),
-                                            MatrRotateY(-102 * 5 / 8.0 * Uni->RotY),
-                                            MatrTranslate(Uni->At))),
-    Uni->At, VecSet(0, 1, 0));*/
-/*}/* End of 'NM6_UnitResponse' function */
-
-
-/* Bounce ball unit render function
-* ARGUMENTS:
-* - self-pointer to unit object
-* nm6UNIT_BALL *Uni;
-* - animation context:
-* nm6ANIM *Ani;
-* RETURNS: None.
-*/
-/*static VOID NM6_UnitRender( VOID )
+/* Ctrl unit inter frame events handle function.
+ * ARGUMENTS:
+ *   - self-pointer to unit object:
+ *       nm6UNIT_CTRL *Uni;
+ *   - animation context:
+ *       nm6ANIM *Ani;
+ * RETURNS: None.
+ */
+static VOID NM6_UnitClose( nm6UNIT_CTRL *Uni, nm6ANIM *Ani )
 {
-}/* End of 'NM6_UnitRender' function */
+} /* End of 'NM6_UnitResponse' function */
 
+/* Ctrl unit render function.
+ * ARGUMENTS:
+ *   - self-pointer to unit object:
+ *       nm6UNIT_CTRL *Uni;
+ *   - animation context:
+ *       nm6ANIM *Ani;
+ * RETURNS: None.
+ */
+static VOID NM6_UnitRender( nm6UNIT_CTRL *Uni, nm6ANIM *Ani )
+{
+  NM6_RndCamSet(Uni->CamLoc, Uni->At, VecSet(0, 1, 0));
+} /* End of 'NM6_UnitRender' function */
 
-/* Unit ball creation function
-* ARGUMENTS: None.
-* RETURNS:
-* (nm6UNIT *) pointer to created unit
-*/
-/*nm6UNIT * NM6_UnitCreateCtrl( VOID )
+/* Unit ctrl creation function.
+ * ARGUMENTS: None.
+ * RETURNS:
+ *   (nm6UNIT *) pointer to created unit.
+ */
+nm6UNIT * NM6_UnitCreateCtrl( VOID )
 {
   nm6UNIT *Uni;
 
-  if ((Uni = (nm6UNIT *)NM6_AnimUnitCreate(sizeof(nm6UNIT_ctrl))) == NULL)
+  if ((Uni = (nm6UNIT *)NM6_AnimUnitCreate(sizeof(nm6UNIT_CTRL))) == NULL)
     return NULL;
 
   /* Setup unit methods */
-  /*Uni->Init = (VOID *)NM6_UnitInit;
+  Uni->Init = (VOID *)NM6_UnitInit;
   Uni->Response = (VOID *)NM6_UnitResponse;
   Uni->Render = (VOID *)NM6_UnitRender;
+  Uni->Close = (VOID *)NM6_UnitClose;
 
   return Uni;
-}/* End of 'NM6_UnitCreateCtrl' function */
+} /* End of 'NM6_UnitCreateCtrl' function */
+
+
+/* END OF 'unit_ctrl.c' FUNCTION */

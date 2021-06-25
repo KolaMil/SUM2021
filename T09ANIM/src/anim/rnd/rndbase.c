@@ -1,16 +1,18 @@
-/* FILE NAME: rndbase.c
-* PROGRAMMER: NM6
-* DATE: 17.06.2021
-* PURPOSE: 3D animation rendering function module.
+/* FILE NAME : rndbase.c
+ * PROGRAMMER: NM6
+ * DATE      : 21.06.2021 
+ * PURPOSE   : WinAPI Animation startup module
+ */
+#include "../anim.h"
+
+
+/* Render initialization function.
+ * ARGUMENTS:
+ *   - Working window:
+ *       HWND hWnd;
+ * RETURNS:
+ *   (VOID) None.
 */
-
-#include "rnd.h"
-#include <wglew.h>
-#include <gl/wglext.h>
-
-#pragma comment(lib, "opengl32")
-
-/* NM6_RndInit */
 VOID NM6_RndInit( HWND hWnd )
 {
   INT i, nums;
@@ -76,85 +78,136 @@ VOID NM6_RndInit( HWND hWnd )
 
   NM6_hRndGLRC = hRC;
   wglMakeCurrent(NM6_hRndDC, NM6_hRndGLRC);
+
   /* Set default OpenGL parameters */
   glEnable(GL_DEPTH_TEST);
-  glClearColor(0.08, 0.16, 0.08, 1);
-  NM6_RndShadersInit();
+  wglSwapIntervalEXT(0);
 
-  /* Render perametrs */
   NM6_RndProjSize = 0.1;
   NM6_RndProjDist = NM6_RndProjSize;
   NM6_RndProjFarClip = 300;
-  NM6_RndFrameW = 50;
-  NM6_RndFrameH = 50;
-  NM6_RndCamSet(VecSet(0, 0, 30), VecSet(0, 0, 0), VecSet(0, 1, 0));
-}/* End of 'NM6_RndInit' function */
+  NM6_RndFrameH = 300;
+  NM6_RndFrameW = 300;
 
-/* NM6_RndClose */
+  NM6_RndCamSet(VecSet(0, 3, 5), VecSet1(0), VecSet(0, 1, 0));
+} /* End of 'NM6_RndInit' function */
+
+/* Render closing function.
+ * ARGUMENTS:
+ *   (VOID) None.
+ * RETURNS:
+ *   (VOID) None.
+*/
 VOID NM6_RndClose( VOID )
 {
-  NM6_RndShadersClose();
   wglMakeCurrent(NULL, NULL);
   wglDeleteContext(NM6_hRndGLRC);
   ReleaseDC(NM6_hRndWnd, NM6_hRndDC);
-}/* End of 'NM6_RndClose' function */
+} /* End of 'NM6_RndClose' function */
 
-/* NM6_RndCopyFrame */
-VOID NM6_RndCopyFrame( VOID )
-{
-  SwapBuffers(NM6_hRndDC);
-}/* End of 'NM6_RndCopyFrame' function */
-
-/* NM6_RndProjSet */
+/* Render projection setting function.
+ * ARGUMENTS:
+ *   (VOID) None.
+ * RETURNS:
+ *   (VOID) None.
+*/
 VOID NM6_RndProjSet( VOID )
 {
-  FLT rx, ry;
+  DBL rx, ry;
 
   rx = ry = NM6_RndProjSize;
 
   /* Correct aspect ratio */
   if (NM6_RndFrameW > NM6_RndFrameH)
-    rx *= (FLT)NM6_RndFrameW / NM6_RndFrameH;
+    rx *= (DBL)NM6_RndFrameW / NM6_RndFrameH;
   else
-    ry *= (FLT)NM6_RndFrameH / NM6_RndFrameW;
+    ry *= (DBL)NM6_RndFrameH / NM6_RndFrameW;
 
   NM6_RndMatrProj =
-  MatrFrustum(-rx / 2, rx / 2, -ry / 2, ry / 2,
-  NM6_RndProjDist, NM6_RndProjFarClip);
+    MatrFrustum(-rx / 2, rx / 2, -ry / 2, ry / 2,
+      NM6_RndProjDist, NM6_RndProjFarClip);
   NM6_RndMatrVP = MatrMulMatr(NM6_RndMatrView, NM6_RndMatrProj);
-}/* NM6_RndProjSet */
+} /* End of 'NM6_RndProjSet' function */
 
-/* NM6_RndCamset */
+/* Render camera setting function.
+ * ARGUMENTS:
+ *   - Location pos:
+ *       VEC Loc;
+ *   - Looking at pos:
+ *       VEC At;
+ *   - Up vec:
+ *       VEC Up;
+ * RETURNS:
+ *   (VOID) None.
+*/
 VOID NM6_RndCamSet( VEC Loc, VEC At, VEC Up )
 {
   NM6_RndMatrView = MatrView(Loc, At, Up);
   NM6_RndMatrVP = MatrMulMatr(NM6_RndMatrView, NM6_RndMatrProj);
-}/* End of 'NM6_RndCamSet' function */
+} /* End of 'NM6_RndCamSet' function */
 
-/* NM6_RndStart */
-VOID NM6_RndStart( VOID )
-{
-  NM6_RndShadersUpdate();
-  /* Clear frame */
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}/* End of 'NM6_RndStart' function */
-
-/* NM6_RndEnd */
-VOID NM6_RndEnd( VOID )
-{
-  glFinish();
-}/* End of 'NM6_RndEnd' function */
-
-/* NM6_RndResize */
+/* Render resizing function.
+ * ARGUMENTS:
+ *   - Window size:
+ *       INT W, H;
+ * RETURNS:
+ *   (VOID) None.
+*/
 VOID NM6_RndResize( INT W, INT H )
 {
   glViewport(0, 0, W, H);
 
+  /* Saving size */
   NM6_RndFrameW = W;
   NM6_RndFrameH = H;
 
+  /* Projection recounting */
   NM6_RndProjSet();
-}/* End of 'NM6_RndResize' function */
+} /* End of 'NM6_RndResize' function */
+
+/* Render frame copying function.
+ * ARGUMENTS:
+ *   - Device context:
+ *       HDC hDC;
+ * RETURNS:
+ *   (VOID) None.
+*/
+VOID NM6_RndCopyFrame( VOID )
+{
+  SwapBuffers(NM6_hRndDC);
+} /* End of 'NM6_RndCopyFrame' function */
+
+/* Render starting function.
+ * ARGUMENTS:
+ *   (VOID) None.
+ * RETURNS:
+ *   (VOID) None.
+*/
+VOID NM6_RndStart( VOID )
+{
+  static DBL dt;
+  
+  dt += NM6_Anim.GlobalDeltaTime;
+  if (dt > 2)
+  {
+    dt = 0;
+    NM6_RndShadersUpdate();
+  }
+
+  glClearColor(0.2, 0.8, 0.2, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+} /* End of 'NM6_RndStart' function */
+
+/* Render closing function.
+ * ARGUMENTS:
+ *   (VOID) None.
+ * RETURNS:
+ *   (VOID) None.
+*/
+VOID NM6_RndEnd( VOID )
+{
+  glFinish();
+} /* End of 'NM6_RndStart' function */
 
 
 /* END OF 'rndbase.c' FILE */

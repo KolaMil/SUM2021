@@ -1,16 +1,14 @@
-/* FILE NAME: main.c
-* PROGRAMMER: NM6
-* DATE: 17.06.2021
-* PURPOSE: 3D animation startup module.
-*/
-
+/* FILE NAME : main.c
+ * PROGRAMMER: NM6
+ * DATE: 21.06.2021 
+ * PURPOSE : WinAPI Animation startup module
+ */
 #include "../units/units.h"
 
-/* Window class name */
 #define NM6_WND_CLASS_NAME "My Window Class Name"
 
-/* Forward declaration */
-LRESULT CALLBACK NM6_WinFunc( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam );
+/* Callback window fuction */
+LRESULT CALLBACK NM6_WinFunc( HWND hWnd, UINT Msg,  WPARAM wParam, LPARAM lParam );
 
 /* The main program function.
 * ARGUMENTS:
@@ -25,7 +23,7 @@ LRESULT CALLBACK NM6_WinFunc( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam 
 * RETURNS:
 * (INT) Error level for operation system (0 for success).
 */
-INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, CHAR *CmdLine, INT CmdShow )
+INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, CHAR *CmdLine, INT ShowCmd )
 {
   HWND hWnd;
   MSG msg;
@@ -54,7 +52,7 @@ INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, CHAR *CmdLine,
 
   hWnd =
   CreateWindow(NM6_WND_CLASS_NAME,
-  "KOLA)&AH",
+  "RRYTAY GRYPPA",
   WS_OVERLAPPEDWINDOW,
   CW_USEDEFAULT, CW_USEDEFAULT,
   CW_USEDEFAULT, CW_USEDEFAULT,
@@ -64,12 +62,12 @@ INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, CHAR *CmdLine,
   NULL);
 
   /* Show window */
-  ShowWindow(hWnd, CmdShow);
+  ShowWindow(hWnd, ShowCmd);
   UpdateWindow(hWnd);
 
-  /**************************/
+  /* Create Cow */
   NM6_AnimAddUnit(NM6_UnitCreateCow());
-
+  NM6_AnimAddUnit(NM6_UnitCreateCtrl());
 
   /* Message loop */
   while (GetMessage(&msg, NULL, 0, 0))
@@ -77,7 +75,6 @@ INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, CHAR *CmdLine,
 
   return 30;
 } /* End of 'WinMain' function */
-
 /* Window handle function.
 * ARGUMENTS:
 * - window handle:
@@ -91,50 +88,75 @@ INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, CHAR *CmdLine,
 * RETURNS:
 * (LRESULT) message depende return value.
 */
-LRESULT CALLBACK NM6_WinFunc( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam )
+LRESULT CALLBACK NM6_WinFunc( HWND hWnd, UINT Msg, 
+                     WPARAM wParam, LPARAM lParam )
 {
-  HDC hDC;
   PAINTSTRUCT ps;
 
   switch (Msg)
   {
-  /* create */
+    /* GETMINMAXINFO */
+  case WM_GETMINMAXINFO:
+    ((MINMAXINFO *)lParam)->ptMaxTrackSize.y =
+      GetSystemMetrics(SM_CYMAXTRACK) + GetSystemMetrics(SM_CYCAPTION) + 2 * GetSystemMetrics(SM_CYBORDER);
+    return 0;
+    /* CREATE */
   case WM_CREATE:
     NM6_AnimInit(hWnd);
-    SetTimer(hWnd, 47, 1, NULL);
+    SetTimer(hWnd, 30, 1, NULL);
     return 0;
-
-  /* size */
+    /* SIZE */
   case WM_SIZE:
     NM6_AnimResize(LOWORD(lParam), HIWORD(lParam));
-    SendMessage(hWnd, WM_TIMER, 47, 0);
+    SendMessage(hWnd, WM_TIMER, 30, 0);
     return 0;
-
-  /* timer */
+    /* TIMER */
   case WM_TIMER:
     NM6_AnimRender();
     NM6_AnimCopyFrame();
     return 0;
-
-  /* paint */
+    /* KEYDOWN */
+  case WM_KEYDOWN:
+    if (wParam == 27)
+      SendMessage(hWnd, WM_CLOSE, 0, 0);
+    else if (wParam == 'Q')
+      NM6_Anim.IsPause = !NM6_Anim.IsPause;
+    return 0;
+    /*  */
+  case WM_CLOSE:
+    if (MessageBox(hWnd, "You sure?", "Exit", MB_YESNO | MB_ICONQUESTION) == IDYES)
+      break;
+    return 0;
+    /*  */
+  case WM_LBUTTONDOWN:
+    SetCapture(hWnd);
+    return 0;
+    /*  */
+  case WM_LBUTTONUP:
+    ReleaseCapture();
+    return 0;
+    /*  */
+  case WM_MOUSEWHEEL:
+    NM6_MouseWheel += (SHORT)HIWORD(wParam);
+    return 0;
+    /*  */
   case WM_PAINT:
-    hDC = BeginPaint(hWnd, &ps);
+    BeginPaint(hWnd, &ps);
     NM6_AnimCopyFrame();
     EndPaint(hWnd, &ps);
     return 0;
-
-  /* destroy */
+    /*  */
+  case WM_ERASEBKGND:
+    return 1;
   case WM_DESTROY:
     NM6_AnimClose();
     KillTimer(hWnd, 30);
-    PostQuitMessage(45);
+    PostQuitMessage(27);
     return 0;
-
-  /* erase */
-  case WM_ERASEBKGND:
-    return 1;
   }
+
   return DefWindowProc(hWnd, Msg, wParam, lParam);
-}/* End of 'NM6_WinFunc' function */
+
+} /* End of 'NM6_WinFunc' function */
 
 /* END OF 'main.c' FILE */
