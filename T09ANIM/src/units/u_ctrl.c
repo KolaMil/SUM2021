@@ -1,7 +1,7 @@
 /* FILE NAME : unit_ctrl.c
- * PROGRAMMER: NM6
- * DATE      : 21.06.2021 
- * PURPOSE   : Ctrl unit module
+ * PROGRAMMER : NM6
+ * DATE : 21.06.2021 
+ * PURPOSE : Ctrl unit module
  */
 #include <stdio.h>
 
@@ -29,7 +29,7 @@ typedef struct tagnm6UNIT_CTRL
  */
 static VOID NM6_UnitInit( nm6UNIT_CTRL *Uni, nm6ANIM *Ani )
 {
-  Uni->CamLoc = VecSet(63, 53, -110);
+  Uni->CamLoc = VecSet(10, 10, 10);
   Uni->Speed = 5;
   Uni->AngleSpeed = 5;
   Uni->At = VecSet1(0);

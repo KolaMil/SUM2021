@@ -87,10 +87,11 @@ VOID NM6_RndPrimCreate( nm6PRIM *Pr, nm6PRIM_TYPE Type, nm6VERTEX *V, INT NumOfV
 */
 VOID NM6_RndPrimDraw( nm6PRIM *Pr, MATR World )
 {
-  MATR wvp = MatrMulMatr3(Pr->Trans, World, NM6_RndMatrVP),
+  MATR
+    wvp = MatrMulMatr3(Pr->Trans, World, NM6_RndMatrVP),
     w = MatrMulMatr(Pr->Trans, World),
     winv = MatrTranspose(MatrInverse(w));
-  INT ProgId = NM6_RndShaders[0].ProgId, loc;
+  INT ProgId = NM6_RndMtlApply(Pr->MtlNo), loc;
   INT gl_prim_type = Pr->Type == NM6_RND_PRIM_LINES ? GL_LINES :
                    Pr->Type == NM6_RND_PRIM_TRIMESH ? GL_TRIANGLES :
                    Pr->Type == NM6_RND_PRIM_TRISTRIP ? GL_TRIANGLE_STRIP :
@@ -98,8 +99,6 @@ VOID NM6_RndPrimDraw( nm6PRIM *Pr, MATR World )
 
   /* Send matrix to OpenGL /v.1.0 */
   glLoadMatrixf(wvp.M[0]);
-
-  glUseProgram(ProgId);
 
   if ((loc = glGetUniformLocation(ProgId, "Time")) != -1)
     glUniform1f(loc, NM6_Anim.Time);

@@ -11,13 +11,14 @@
 #include <glew.h>
 
 
-#include "../../def.h"
 #include "res/rndres.h"
 
 #include <wglew.h>
 #include <gl/wglext.h>
 
 #pragma comment(lib, "opengl32")
+
+#define NM6_STR_MAX 300
 
 typedef struct tagnm6VERTEX
 {
@@ -51,6 +52,16 @@ typedef struct tagnm6PRIM
 
   MATR Trans;   /* Additional transformation matrix */
 } nm6PRIM;
+
+
+/* Primitive collection data type */
+typedef struct tagnm6PRIMS
+{
+  INT NumOfPrims; /* Number of primitives in array */  
+  nm6PRIM *Prims; /* Array of primitives */
+  MATR Trans;     /* Common transformation matrix */
+} nm6PRIMS;
+
 
 extern HWND NM6_hRndWnd;                 /* Work window handle */
 extern HDC NM6_hRndDC;              /* Work window memory device context  */
@@ -217,14 +228,6 @@ VOID NM6_RndPrimCreateGrid( nm6PRIM *Pr, INT Grid_W, INT Grid_H, nm6VERTEX *V );
  * Primitive collection support
  ***/
 
-/* Primitive collection data type */
-typedef struct tagnm6PRIMS
-{
-  INT NumOfPrims; /* Number of primitives in array */  
-  nm6PRIM *Prims; /* Array of primitives */
-  MATR Trans;     /* Common transformation matrix */
-} nm6PRIMS;
-
 /* Create array of primitives function.
  * ARGUMENTS:
  *   - pointer to primitives structure:
@@ -265,7 +268,50 @@ VOID NM6_RndPrimsDraw( nm6PRIMS *Prs, MATR World );
  */
 BOOL NM6_RndPrimsLoad( nm6PRIMS *Prs, CHAR *FileName );
 
+/* rndprims.c Prototips */
+/***
+ * Primitive collection support
+ ***/
 
+/* Create array of primitives function.
+ * ARGUMENTS:
+ *   - pointer to primitives structure:
+ *       nm6PRIMS *Prs;
+ *   - number of primitives to be add:
+ *       INT NumOfPrims;
+ * RETURNS:
+ *   (BOOL) TRUE if successful, FALSE otherwise.
+ */
+BOOL NM6_RndPrimsCreate( nm6PRIMS *Prs, INT NumOfPrims );
+
+/* Delete array of primitives function.
+ * ARGUMENTS:
+ *   - pointer to primitives structure:
+ *       nm6PRIMS *Prs;
+ * RETURNS: None.
+ */
+VOID NM6_RndPrimsFree( nm6PRIMS *Prs );
+
+/* Draw array of primitives function.
+ * ARGUMENTS:
+ *   - pointer to primitives structure:
+ *       nm6PRIMS *Prs;
+ *   - global transformation matrix:
+ *       MATR World;
+ * RETURNS: None.
+ */
+VOID NM6_RndPrimsDraw( nm6PRIMS *Prs, MATR World );
+
+/* Load array of primitives from .G3DM file function.
+ * ARGUMENTS:
+ *   - pointer to primitives structure:
+ *       nm6PRIMS *Prs;
+ *   - file name:
+ *       CHAR *FileName;
+ * RETURNS:
+ *   (BOOL) TRUE if successful, FALSE otherwise.
+ */
+BOOL NM6_RndPrimsLoad( nm6PRIMS *Prs, CHAR *FileName );
 
 #endif /* __rnd_h_ */
 

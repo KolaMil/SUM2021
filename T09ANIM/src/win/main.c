@@ -67,7 +67,9 @@ INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, CHAR *CmdLine,
 
   /* Create Cow */
   NM6_AnimAddUnit(NM6_UnitCreateCow());
+  /*NM6_AnimAddUnit(NM6_UnitCreateTEXPRIM());*/
   NM6_AnimAddUnit(NM6_UnitCreateCtrl());
+  NM6_AnimAddUnit(NM6_UnitCreateGear());
 
   /* Message loop */
   while (GetMessage(&msg, NULL, 0, 0))
@@ -122,32 +124,33 @@ LRESULT CALLBACK NM6_WinFunc( HWND hWnd, UINT Msg,
     else if (wParam == 'Q')
       NM6_Anim.IsPause = !NM6_Anim.IsPause;
     return 0;
-    /*  */
+    /* CLOSE */
   case WM_CLOSE:
-    if (MessageBox(hWnd, "You sure?", "Exit", MB_YESNO | MB_ICONQUESTION) == IDYES)
+    if (MessageBox(hWnd, " dyrak ?", "Exit", MB_YESNO | MB_ICONQUESTION) == IDYES)
       break;
     return 0;
-    /*  */
+    /* LBUTTONDOWN */
   case WM_LBUTTONDOWN:
     SetCapture(hWnd);
     return 0;
-    /*  */
+    /* LBUTTONUP */
   case WM_LBUTTONUP:
     ReleaseCapture();
     return 0;
-    /*  */
+    /* MOUSEWHEEL */
   case WM_MOUSEWHEEL:
     NM6_MouseWheel += (SHORT)HIWORD(wParam);
     return 0;
-    /*  */
+    /* PAINT */
   case WM_PAINT:
     BeginPaint(hWnd, &ps);
     NM6_AnimCopyFrame();
     EndPaint(hWnd, &ps);
     return 0;
-    /*  */
+    /* ERASEBKGND */
   case WM_ERASEBKGND:
     return 1;
+    /* DESTROY */
   case WM_DESTROY:
     NM6_AnimClose();
     KillTimer(hWnd, 30);

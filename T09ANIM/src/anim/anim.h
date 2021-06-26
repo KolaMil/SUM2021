@@ -1,7 +1,7 @@
 /* FILE NAME : anim.h
- * PROGRAMMER: NM6
- * DATE      : 21.06.2021 
- * PURPOSE   : Anim declaration module
+ * PROGRAMMER : NM6
+ * DATE : 21.06.2021 
+ * PURPOSE : Anim declaration module
  */
 
 #ifndef __anim_h_
@@ -41,10 +41,10 @@ typedef struct tagnm6ANIM
 
   INT Mx, My, Mz, Mdx, Mdy, Mdz; /* Mouse data */
 
-  BYTE
+  /*BYTE
     JBut[32], JButOld[32], JButClick[32]; /* Joystick button states */
-  INT JPov;                               /* Joystick point-of-view control [-1,0..7] */
-  DBL
+  /*INT JPov;                               /* Joystick point-of-view control [-1,0..7] */
+  /*DBL
     JX, JY, JZ, JR;                       /* Joystick axes */
 
 } nm6ANIM;

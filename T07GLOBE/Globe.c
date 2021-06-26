@@ -23,7 +23,7 @@ VEC RotateZ( VEC V, DBL Angle)
   r.Y = V.Y * co - V.X * si;
   r.Z = V.Z;
   return r;
-}
+}  
 
 VEC RotateY( VEC V, DBL Angle)
 {
@@ -86,9 +86,9 @@ VOID GlobeDraw( HDC hDC )
   r = WinW < WinH ? WinW :WinH;
 
   m = 
-    MatrMulMatr3(MatrRotateZ(t * 30),
-                 MatrRotateZ(t * 18),
-                 MatrTranslate(VecSet(0, fabs(0.8 * sin(t * 5) - 0.47), 0)));
+    MatrMulMatr3(MatrRotateZ(t * 100),
+                 MatrRotateZ(t * 10),
+                 MatrTranslate(VecSet(0, fabs(0.8 * sin(t * 10) - 0.47), 0)));
 
   for (i = 0; i < GRID_H; i++)
     for (j = 0; j < GRID_W; j++)
@@ -98,7 +98,7 @@ VOID GlobeDraw( HDC hDC )
       /* Point transformation */
       p = PointTransform(p, m);
                                                       
-      p = RotateZ(p, t * 30);
+      p = RotateZ(p, t * 100);
       p = RotateY(p, t * 100);
 
       pnts[i][j].x = WinW / 2 + p.X * r * 0.47;

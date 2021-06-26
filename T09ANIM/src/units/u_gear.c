@@ -1,33 +1,34 @@
-/* FILE NAME : u_ball.c
+/* FILE NAME : u_gear.c
  * PROGRAMMER: NM6
  * DATE : 21.06.2021 
  * PURPOSE : Ball unit module
  */
 
 #include <stdio.h>
+#include <time.h>
 
 #include "units.h"
 
-typedef struct tagnm6UNIT_COW
+typedef struct tagnm6UNIT_Gear
 {
   UNIT_BASE_FIELDS;
-  nm6PRIMS Cow;
+  nm6PRIM Gear;
   FLT AngleToRotY;
   VEC Pos;
   INT TexNo;
-} nm6UNIT_COW;
+} nm6UNIT_Gear;
 
 /* Cow unit initialization function.
  * ARGUMENTS:
  *   - self-pointer to unit object:
- *       nm6UNIT_COW *Uni;
+ *       nm6UNIT_Gear *Uni;
  *   - animation context:
  *       nm6ANIM *Ani;
  * RETURNS: None.
  */
-static VOID NM6_UnitInit( nm6UNIT_COW *Uni, nm6ANIM *Ani )
+static VOID NM6_UnitInit( nm6UNIT_Gear *Uni, nm6ANIM *Ani )
 {
-  NM6_RndPrimsLoad(&Uni->Cow, "BIN/MODELS/BTR.g3dm");
+  NM6_RndPrimLoad(&Uni->Gear, "BIN/MODELS/gear.obj");
 } /* End of 'NM6_UnitInit' function */
 
 /* Cow unit inter frame events handle function.
@@ -38,21 +39,21 @@ static VOID NM6_UnitInit( nm6UNIT_COW *Uni, nm6ANIM *Ani )
  *       nm6ANIM *Ani;
  * RETURNS: None.
  */
-static VOID NM6_UnitResponse( nm6UNIT_COW *Uni, nm6ANIM *Ani )
+static VOID NM6_UnitResponse( nm6UNIT_Gear *Uni, nm6ANIM *Ani )
 {
 } /* End of 'NM6_UnitResponse' function */
 
 /* Cow unit inter frame events handle function.
  * ARGUMENTS:
  *   - self-pointer to unit object:
- *       nm6UNIT_COW *Uni;
+ *       nm6UNIT_Gear *Uni;
  *   - animation context:
  *       nm6ANIM *Ani;
  * RETURNS: None.
  */
-static VOID NM6_UnitClose( nm6UNIT_COW *Uni, nm6ANIM *Ani )
+static VOID NM6_UnitClose( nm6UNIT_Gear *Uni, nm6ANIM *Ani )
 {
-  NM6_RndPrimsFree(&Uni->Cow);
+  NM6_RndPrimFree(&Uni->Gear);
 } /* End of 'NM6_UnitResponse' function */
 
 /* Cow unit render function.
@@ -63,9 +64,11 @@ static VOID NM6_UnitClose( nm6UNIT_COW *Uni, nm6ANIM *Ani )
  *       nm6ANIM *Ani;
  * RETURNS: None.
  */
-static VOID NM6_UnitRender( nm6UNIT_COW *Uni, nm6ANIM *Ani )
+static VOID NM6_UnitRender( nm6UNIT_Gear *Uni, nm6ANIM *Ani )
 {
-  NM6_RndPrimsDraw(&Uni->Cow, MatrMulMatr3(MatrScale(VecSet1(0.0089)), MatrRotateY(0), MatrTranslate(VecSet(0, 0, 10))));
+  NM6_RndPrimDraw(&Uni->Gear, MatrMulMatr3(MatrRotateZ(Ani->GlobalTime * 100),
+                 MatrRotateZ(Ani->GlobalTime * 10),
+                 MatrTranslate(VecSet(0, fabs(0.8 * sin(Ani->GlobalTime * 10) - 0.47), 0))));
   /*MatrMulMatr3(MatrScale(VecSet1(0.1)), MatrRotateY(30), MatrTranslate(VecSet(-10, 0, -35)))*/
 } /* End of 'NM6_UnitRender' function */
 
@@ -74,11 +77,11 @@ static VOID NM6_UnitRender( nm6UNIT_COW *Uni, nm6ANIM *Ani )
  * RETURNS:
  *   (nm6UNIT *) pointer to created unit.
  */
-nm6UNIT * NM6_UnitCreateCow( VOID )
+nm6UNIT * NM6_UnitCreateGear( VOID )
 {
   nm6UNIT *Uni;
 
-  if ((Uni = (nm6UNIT *)NM6_AnimUnitCreate(sizeof(nm6UNIT_COW))) == NULL)
+  if ((Uni = (nm6UNIT *)NM6_AnimUnitCreate(sizeof(nm6UNIT_Gear))) == NULL)
     return NULL;
 
   /* Setup unit methods */
@@ -88,7 +91,7 @@ nm6UNIT * NM6_UnitCreateCow( VOID )
   Uni->Close = (VOID *)NM6_UnitClose;
 
   return Uni;
-} /* End of 'NM6_UnitCreateCow' function */
+} /* End of 'NM6_UnitCreateGear' function */
 
 
 /* END OF 'u_ball.c' FUNCTION */

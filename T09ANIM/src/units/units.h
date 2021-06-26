@@ -13,6 +13,9 @@
 */
 nm6UNIT * NM6_UnitCreateCow( VOID );
 nm6UNIT * NM6_UnitCreateCtrl( VOID );
+nm6UNIT * NM6_UnitCreateGear( VOID );
+nm6UNIT * NM6_UnitCreateTEXPRIM( VOID );
+
 
 
 /* END OF 'units.c' FILE */

@@ -83,6 +83,11 @@ VOID NM6_RndInit( HWND hWnd )
   glEnable(GL_DEPTH_TEST);
   wglSwapIntervalEXT(0);
 
+  NM6_RndShadersInit();
+  NM6_RndTexturesInit();
+  NM6_RndMtlInit();
+
+
   NM6_RndProjSize = 0.1;
   NM6_RndProjDist = NM6_RndProjSize;
   NM6_RndProjFarClip = 300;
@@ -100,6 +105,9 @@ VOID NM6_RndInit( HWND hWnd )
 */
 VOID NM6_RndClose( VOID )
 {
+  NM6_RndShadersClose();
+  NM6_RndTexturesClose();
+  NM6_RndMtlClose();
   wglMakeCurrent(NULL, NULL);
   wglDeleteContext(NM6_hRndGLRC);
   ReleaseDC(NM6_hRndWnd, NM6_hRndDC);
@@ -142,6 +150,7 @@ VOID NM6_RndProjSet( VOID )
 */
 VOID NM6_RndCamSet( VEC Loc, VEC At, VEC Up )
 {
+  NM6_RndCamLoc = Loc;
   NM6_RndMatrView = MatrView(Loc, At, Up);
   NM6_RndMatrVP = MatrMulMatr(NM6_RndMatrView, NM6_RndMatrProj);
 } /* End of 'NM6_RndCamSet' function */
