@@ -8,7 +8,7 @@
 #include <time.h>
 
 #include "units.h"
-
+                          
 typedef struct tagnm6UNIT_Gear
 {
   UNIT_BASE_FIELDS;
@@ -66,9 +66,7 @@ static VOID NM6_UnitClose( nm6UNIT_Gear *Uni, nm6ANIM *Ani )
  */
 static VOID NM6_UnitRender( nm6UNIT_Gear *Uni, nm6ANIM *Ani )
 {
-  NM6_RndPrimDraw(&Uni->Gear, MatrMulMatr3(MatrRotateZ(Ani->GlobalTime * 100),
-                 MatrRotateZ(Ani->GlobalTime * 10),
-                 MatrTranslate(VecSet(0, fabs(0.8 * sin(Ani->GlobalTime * 10) - 0.47), 0))));
+  NM6_RndPrimDraw(&Uni->Gear, MatrMulMatr3(MatrScale(VecSet1(4)), MatrRotateY(0), MatrTranslate(VecSet(0, 0, 0))));
   /*MatrMulMatr3(MatrScale(VecSet1(0.1)), MatrRotateY(30), MatrTranslate(VecSet(-10, 0, -35)))*/
 } /* End of 'NM6_UnitRender' function */
 

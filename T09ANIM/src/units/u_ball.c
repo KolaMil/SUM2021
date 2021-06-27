@@ -65,7 +65,7 @@ static VOID NM6_UnitClose( nm6UNIT_COW *Uni, nm6ANIM *Ani )
  */
 static VOID NM6_UnitRender( nm6UNIT_COW *Uni, nm6ANIM *Ani )
 {
-  NM6_RndPrimsDraw(&Uni->Cow, MatrMulMatr3(MatrScale(VecSet1(0.0089)), MatrRotateY(0), MatrTranslate(VecSet(0, 0, 10))));
+  NM6_RndPrimsDraw(&Uni->Cow, MatrMulMatr3(MatrScale(VecSet1(0.006)), MatrRotateY(30), MatrTranslate(VecSet(0, 0, 3))));
   /*MatrMulMatr3(MatrScale(VecSet1(0.1)), MatrRotateY(30), MatrTranslate(VecSet(-10, 0, -35)))*/
 } /* End of 'NM6_UnitRender' function */
 

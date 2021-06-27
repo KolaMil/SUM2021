@@ -6,7 +6,7 @@
 
 #ifndef __rndres_h_
 #define __rndres_h_
-
+                          
 #include "../../../def.h"
 
 #define NM6_STR_MAX 300

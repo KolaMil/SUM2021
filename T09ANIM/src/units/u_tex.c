@@ -57,7 +57,7 @@ static VOID NM6_UnitInit( nm6UNIT_TEXPRIM *Uni, nm6ANIM *Ani )
 /* Cow unit inter frame events handle function.
  * ARGUMENTS:
  *   - self-pointer to unit object:
- *       nm6UNIT_COW *Uni;
+ *       nm6UNIT_Gear *Uni;
  *   - animation context:
  *       nm6ANIM *Ani;
  * RETURNS: None.
@@ -82,7 +82,7 @@ static VOID NM6_UnitClose( nm6UNIT_TEXPRIM *Uni, nm6ANIM *Ani )
 /* Cow unit render function.
  * ARGUMENTS:
  *   - self-pointer to unit object:
- *       nm6UNIT_COW *Uni;
+ *       nm6UNIT_Gear *Uni;
  *   - animation context:
  *       nm6ANIM *Ani;
  * RETURNS: None.
